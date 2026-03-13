@@ -1,0 +1,52 @@
+{
+  "name": "time-memory-context",
+  "version": "1.0.0",
+  "description": "时序记忆上下文 - 基于时间分层的记忆管理系统，减少80% Token消耗",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "time-memory-context": "dist/cli.js",
+    "tmc": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src/**/*.ts",
+    "cli": "node dist/cli.js",
+    "maintenance": "node dist/cli.js maintenance",
+    "recall": "node dist/cli.js recall"
+  },
+  "keywords": [
+    "time-memory",
+    "memory",
+    "context",
+    "temporal",
+    "token-optimization",
+    "rag",
+    "openclaw"
+  ],
+  "author": "KimiClaw",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.0.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.0.0"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "roots": ["<rootDir>/src"],
+    "testMatch": ["**/__tests__/**/*.test.ts"],
+    "collectCoverageFrom": [
+      "src/**/*.ts",
+      "!src/**/*.d.ts"
+    ]
+  }
+}

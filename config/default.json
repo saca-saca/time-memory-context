@@ -1,0 +1,87 @@
+{
+  "context": {
+    "keepRounds": 3,
+    "maxTokens": 3000,
+    "summarizeThreshold": 10,
+    "forceSummarizeThreshold": 20
+  },
+  "memory": {
+    "basePath": "./memory",
+    "tiers": {
+      "short": {
+        "days": 7,
+        "compression": "none"
+      },
+      "medium": {
+        "days": 30,
+        "compression": "clean",
+        "cleanRules": {
+          "minImportance": 0.5,
+          "keepTasks": true,
+          "keepPreferences": true,
+          "keepDecisions": true
+        }
+      },
+      "long": {
+        "compression": "archive",
+        "archiveGranularity": "monthly"
+      }
+    }
+  },
+  "vector": {
+    "provider": "ollama",
+    "model": "bge-m3:latest",
+    "dimensions": 1024,
+    "similarityThreshold": 0.6,
+    "topK": 5,
+    "cacheSize": 1000
+  },
+  "wal": {
+    "enabled": true,
+    "maxEntrySize": 10000,
+    "retentionDays": 30
+  },
+  "logging": {
+    "level": "info",
+    "retentionDays": 7
+  },
+  "summarizer": {
+    "provider": "openclaw",
+    "model": "kimi-coding/k2p5",
+    "maxLength": 200
+  },
+  "retrieval": {
+    "enabled": true,
+    "searchShortTerm": true,
+    "searchMediumTerm": true,
+    "searchLongTerm": true,
+    "injectIntoContext": true,
+    "maxInjectedSnippets": 3,
+    "snippetMaxLength": 500
+  },
+  "maintenance": {
+    "schedule": "0 3 * * *",
+    "timezone": "Asia/Shanghai",
+    "autoRun": true
+  },
+  "classification": {
+    "patterns": {
+      "task": [
+        "TODO|待办|任务|需要.*做|记得.*做",
+        "fix|bug|issue|problem|solve"
+      ],
+      "preference": [
+        "喜欢|讨厌|偏好|习惯|总是|从不",
+        "prefer|like|hate|always|never"
+      ],
+      "fact": [
+        "是.*的|有.*个|位于|等于",
+        "is located|has total|equals to"
+      ],
+      "noise": [
+        "^(好的|OK|嗯|哦|啊|行|可以)[。！]?$",
+        "^(thanks|ok|yes|no|maybe)$"
+      ]
+    }
+  }
+}
