@@ -165,15 +165,14 @@ case "$COMMAND" in
         ;;
     
     auto)
-        # 自动模式：检查 → 压缩(如果需要) → 返回结果
-        # 用法: auto-tmc.sh auto '[{"role":"user",...}]' '用户新消息' '[系统提示]' '[助手回复]'
+        # 自动模式：检查 → 压缩(如果需要)
+        # 用法: auto-tmc.sh auto '[{"role":"user",...}]' '用户新消息' '[系统提示]'
         HISTORY="${2:-[]}"
         USER_MSG="${3:-}"
         SYSTEM_PROMPT="${4:-你是一个有帮助的助手}"
-        ASSISTANT_REPLY="${5:-}"
         
         if [ -z "$USER_MSG" ]; then
-            echo "❌ 用法: auto-tmc.sh auto '[历史JSON]' '用户新消息' '[系统提示]' '[助手回复]'"
+            echo "❌ 用法: auto-tmc.sh auto '[历史JSON]' '用户新消息' '[系统提示]'"
             exit 1
         fi
         
@@ -206,18 +205,6 @@ case "$COMMAND" in
                 }
             }'
         fi
-        
-        # 如果有助手回复，自动记录
-        if [ -n "$ASSISTANT_REPLY" ]; then
-            echo ""
-            echo "📝 正在记录助手回复..."
-            time-memory-context record "$ASSISTANT_REPLY" 2>/dev/null
-            if [ $? -eq 0 ]; then
-                echo "✅ 已记录到记忆"
-            else
-                echo "⚠️ 记录失败"
-            fi
-        fi
         ;;
     
     help|*)
@@ -229,7 +216,7 @@ Time Memory Context - 自动压缩辅助脚本
   auto-tmc.sh advice '[历史JSON]'        - 获取压缩建议 (JSON 格式)
   auto-tmc.sh stats '[历史JSON]'         - 显示对话统计
   auto-tmc.sh compress '[历史]' '消息'   - 执行实际压缩
-  auto-tmc.sh auto '[历史]' '消息' '系统' '回复' - 自动模式(检查+压缩+记录)
+  auto-tmc.sh auto '[历史]' '消息' '系统' - 自动模式(检查+压缩)
   auto-tmc.sh config                     - 显示当前配置
 
 环境变量:
@@ -242,8 +229,9 @@ Time Memory Context - 自动压缩辅助脚本
   auto-tmc.sh check '[{"role":"user","content":"你好"}]'
   auto-tmc.sh advice "\$(cat history.json)"
   auto-tmc.sh compress '[...]' "新消息" "系统提示"
-  auto-tmc.sh auto '[...]' "用户消息" "系统提示" "助手回复"
+  auto-tmc.sh auto '[...]' "用户消息" "系统提示"
   TMC_ROUND_THRESHOLD=5 auto-tmc.sh stats '[...]'
-EOF
+
+注意: time-memory-context 内置 WAL，记录自动处理，无需手动干预
         ;;
 esac

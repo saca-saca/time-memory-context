@@ -44,6 +44,7 @@ RESULT=$(time-memory-context process "我的新问题" \
 MESSAGES=$(echo $RESULT | jq '.messages')
 
 # 3. 回复后记录到记忆
+# WAL 已自动记录，无需额外操作
 time-memory-context record "助手回复内容"
 ```
 
@@ -63,40 +64,11 @@ time-memory-context record "助手回复内容"
 
 ## 初始化配置（推荐）
 
-在 `SOUL.md` 中配置以下规则，实现**自动记录 + 自动压缩**的完整记忆流程。
+在 `SOUL.md` 中配置**自动压缩规则**。time-memory-context 已内置 WAL 预写日志，自动处理记录。
 
-### 双重记录机制
+### 自动压缩规则
 
-同时启用 **time-memory-context** 和 **MEMORY.md** 两种记录方式：
-
-| 方式 | 用途 | 频率 |
-|------|------|------|
-| **time-memory-context** | 机器可读、自动分层、语义检索 | **每次对话自动记录** |
-| **MEMORY.md** | 人类可读、关键决策、长期保留 | 重要时手动/批量更新 |
-
-### 自动记录规则（每次对话都执行）
-
-**执行流程**：
-```
-用户消息
-   ↓
-process() [可能触发压缩]
-   ↓
-生成回复
-   ↓
-time-memory-context record "回复内容"  ← 每次都必须执行
-   ↓
-返回给用户
-```
-
-**配置要点**：
-- 无论是否压缩，**每次回复后都执行 `record`**
-- 写入 WAL 预写日志，防崩溃丢数据
-- 自动分层：0-7天全量 → 7-30天向量 → 30天+归档
-
-### 自动压缩规则（条件触发）
-
-**核心原则**：检查时机在 `process()` 阶段，**不影响记录**
+**核心原则**：条件触发式压缩，不影响正常对话
 
 **触发阈值**：
 | 条件 | 阈值 | 行为 |
@@ -115,30 +87,44 @@ time-memory-context record "回复内容"  ← 每次都必须执行
 ```markdown
 ## 🧠 记忆系统配置
 
-### 自动记录（每次对话）
-- 每次回复后执行: `time-memory-context record "回复内容"`
+### time-memory-context（自动处理）
+- WAL 预写日志: enabled
+- 自动分层: 0-7天全量 → 7-30天向量 → 30天+归档
 - 存储路径: `./memory/`
-- WAL 保留: 30天
 
 ### 自动压缩（条件触发）
 - 轮数阈值: 10 轮
-- Token 阈值: 3000 tokens  
+- Token 阈值: 3000 tokens
 - 强制压缩: 20 轮
 - 保留轮数: 3-5 轮
 
-### MEMORY.md 更新规则
+### MEMORY.md（人工维护）
 - 用户说"记住这个" → 立即更新
 - 重要决策/约定 → 立即更新
-- 日常对话 → 定期从 time-memory-context 提炼
+- 定期从 time-memory-context 提炼关键信息
+```
+
+### 配置同步
+
+确保 `config/default.json` 与上述阈值一致：
+```json
+{
+  "context": {
+    "keepRounds": 3,
+    "maxTokens": 3000,
+    "summarizeThreshold": 10,
+    "forceSummarizeThreshold": 20
+  }
+}
 ```
 
 ## CLI 命令
 
 ```bash
 # 核心：处理消息
- time-memory-context process "消息" --history "[...]" --output-format json
+time-memory-context process "消息" --history "[...]" --output-format json
 
-# 记录回复
+# 记录回复（WAL 自动处理，通常无需手动调用）
 time-memory-context record "回复"
 
 # 查询记忆
